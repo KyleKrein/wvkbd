@@ -8,9 +8,9 @@ static const int transparency = 255;
 struct clr_scheme schemes[] = {
 {
   /* colors */
-  .bg = {.bgra = {15, 15, 15, transparency}},
-  .fg = {.bgra = {45, 45, 45, transparency}},
-  .high = {.bgra = {100, 100, 100, transparency}},
+  .bg = {.bgra = {32, 32, 32, transparency}},
+  .fg = {.bgra = {59, 40, 36, transparency}},
+  .high = {.bgra = {214, 177, 169, transparency}},
   .swipe = {.bgra = {100, 255, 100, 64}},
   .text = {.color = UINT32_MAX},
   .font = DEFAULT_FONT,
@@ -18,9 +18,9 @@ struct clr_scheme schemes[] = {
 },
 {
   /* colors */
-  .bg = {.bgra = {15, 15, 15, transparency}},
-  .fg = {.bgra = {32, 32, 32, transparency}},
-  .high = {.bgra = {100, 100, 100, transparency}},
+  .bg = {.bgra = {32, 32, 32, transparency}},
+  .fg = {.bgra = {38, 27, 26, transparency}},
+  .high = {.bgra = {214, 177, 169, transparency}},
   .swipe = {.bgra = {100, 255, 100, 64}},
   .text = {.color = UINT32_MAX},
   .font = DEFAULT_FONT,
@@ -31,7 +31,7 @@ struct clr_scheme schemes[] = {
 /* layers is an ordered list of layouts, used to cycle through */
 static enum layout_id layers[] = {
   Full, // First layout is the default layout on startup
-  Special, 
+  Special,
   NumLayouts // signals the last item, may not be omitted
 };
 
