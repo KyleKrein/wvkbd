@@ -3,6 +3,7 @@
 *.o
 *-client-protocol.h
 include/config.h
+result
 .gdb_history
 .envrc
 .direnv

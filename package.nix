@@ -1,5 +1,5 @@
 {
-  stdenv,
+  clangStdenv,
   lib,
   wayland-scanner,
   wayland,
@@ -10,9 +10,10 @@
   pkg-config,
   libxkbcommon,
   scdoc,
+  layout ? "vistath",
 }:
 
-stdenv.mkDerivation {
+clangStdenv.mkDerivation {
   pname = "wvkbd";
   version = "0.16";
 
@@ -37,6 +38,7 @@ stdenv.mkDerivation {
     wayland
   ];
   installFlags = [ "PREFIX=$(out)" ];
+  makeFlags = [ "LAYOUT=${layout}" ];
 
   strictDeps = true;
 
@@ -45,6 +47,6 @@ stdenv.mkDerivation {
     description = "On-screen keyboard for wlroots";
     platforms = platforms.linux;
     license = licenses.gpl3Plus;
-    mainProgram = "wvkbd-tablet";
+    mainProgram = "wvkbd-vistath";
   };
 }
