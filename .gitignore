@@ -4,6 +4,8 @@
 *-client-protocol.h
 include/config.h
 .gdb_history
+.envrc
+.direnv
 *.log
 wvkbd
 config.h
