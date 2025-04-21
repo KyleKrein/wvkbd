@@ -14,19 +14,19 @@
       devShells.${system}.default = pkgs.mkShell {
         name = "wvkbd";
 
-      nativeBuildInputs = with pkgs; [
-        pkg-config
-        scdoc
-        wayland-scanner
-      ];
-      buildInputs = with pkgs; [
-        cairo
-        glib
-        harfbuzz
-        libxkbcommon
-        pango
-        wayland
-      ];
+        nativeBuildInputs = with pkgs; [
+          pkg-config
+          scdoc
+          wayland-scanner
+        ];
+        buildInputs = with pkgs; [
+          cairo
+          glib
+          harfbuzz
+          libxkbcommon
+          pango
+          wayland
+        ];
     };
   };
 }

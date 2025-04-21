@@ -6,40 +6,39 @@
 static const int transparency = 255;
 
 struct clr_scheme schemes[] = {
-{
-  /* colors */
-  .bg = {.bgra = {32, 32, 32, transparency}},
-  .fg = {.bgra = {59, 40, 36, transparency}},
-  .high = {.bgra = {214, 177, 169, transparency}},
-  .swipe = {.bgra = {100, 255, 100, 64}},
-  .text = {.color = UINT32_MAX},
-  .font = DEFAULT_FONT,
-  .rounding = DEFAULT_ROUNDING,
-},
-{
-  /* colors */
-  .bg = {.bgra = {32, 32, 32, transparency}},
-  .fg = {.bgra = {38, 27, 26, transparency}},
-  .high = {.bgra = {214, 177, 169, transparency}},
-  .swipe = {.bgra = {100, 255, 100, 64}},
-  .text = {.color = UINT32_MAX},
-  .font = DEFAULT_FONT,
-  .rounding = DEFAULT_ROUNDING,
-}
-};
+    {
+        /* colors */
+        .bg = {.bgra = {32, 32, 32, transparency}},
+        .fg = {.bgra = {59, 40, 36, transparency}},
+        .high = {.bgra = {214, 177, 169, transparency}},
+        .swipe = {.bgra = {100, 255, 100, 64}},
+        .text = {.color = UINT32_MAX},
+        .font = DEFAULT_FONT,
+        .rounding = DEFAULT_ROUNDING,
+    },
+    {
+        /* colors */
+        .bg = {.bgra = {32, 32, 32, transparency}},
+        .fg = {.bgra = {38, 27, 26, transparency}},
+        .high = {.bgra = {214, 177, 169, transparency}},
+        .swipe = {.bgra = {100, 255, 100, 64}},
+        .text = {.color = UINT32_MAX},
+        .font = DEFAULT_FONT,
+        .rounding = DEFAULT_ROUNDING,
+    }};
 
 /* layers is an ordered list of layouts, used to cycle through */
 static enum layout_id layers[] = {
-  Full, // First layout is the default layout on startup
-  Special,
-  NumLayouts // signals the last item, may not be omitted
+    Simple,
+    Full,      // First layout is the default layout on startup
+    NumLayouts // signals the last item, may not be omitted
 };
 
 /* layers is an ordered list of layouts, used to cycle through */
 static enum layout_id landscape_layers[] = {
-  Landscape, // First layout is the default layout on startup
-  LandscapeSpecial,
-  NumLayouts // signals the last item, may not be omitted
+    Simple,
+    Landscape, // First layout is the default layout on startup
+    NumLayouts // signals the last item, may not be omitted
 };
 
 #endif // config_def_h_INCLUDED
