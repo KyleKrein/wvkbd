@@ -9,5 +9,6 @@ result
 .direnv
 *.log
 wvkbd
+*.1
 config.h
 wvkbd-mobintl

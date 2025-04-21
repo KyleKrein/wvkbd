@@ -1626,7 +1626,8 @@ static struct key keys_compose_cyr_tse[] = {
 
 static struct key keys_compose_cyr_g[] = {
   {"ѓ", "Ѓ", 1.0, Copy, 0x0453, 0, 0x0403},
-  {"", "", 9.0, Pad},
+  {"ґ", "Ґ", 1.0, Copy, 0x0491, 0, 0x0490},
+  {"", "", 8.0, Pad},
   {"", "", 0.0, EndRow},
   {"", "", 0.0, EndRow},
   {"⇧", "⇫", 1.5, Mod, Shift, .scheme = 1},

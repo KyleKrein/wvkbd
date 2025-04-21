@@ -6,34 +6,132 @@
 #include "shm_open.h"
 #include "math.h"
 
+void drwbuf_handle_release(void *data, struct wl_buffer *wl_buffer) {
+    struct drwsurf *ds = data;
+    ds->released = true;
+};
+
+const struct wl_buffer_listener buffer_listener = {
+    .release = drwbuf_handle_release
+};
+
+void drwsurf_handle_frame_cb(void* data, struct wl_callback* callback,
+    uint32_t time)
+{
+    struct drwsurf *ds = data;
+    wl_callback_destroy(ds->frame_cb);
+    ds->frame_cb = NULL;
+
+    cairo_rectangle_int_t r = {0};
+    for (int i = 0; i < cairo_region_num_rectangles(ds->damage); i++) {
+        cairo_region_get_rectangle(ds->damage, i, &r);
+        wl_surface_damage(ds->surf, r.x, r.y, r.width, r.height);
+    };
+    cairo_region_subtract(ds->damage, ds->damage);
+
+    drwsurf_attach(ds);
+}
+
+const struct wl_callback_listener frame_listener = {
+    .done = drwsurf_handle_frame_cb
+};
+
+void drwsurf_register_frame_cb(struct drwsurf *ds)
+{
+    if (ds->frame_cb)
+        return;
+    if (!ds->attached)
+        return;
+    ds->frame_cb = wl_surface_frame(ds->surf);
+    wl_callback_add_listener(ds->frame_cb, &frame_listener, ds);
+    wl_surface_commit(ds->surf);
+}
+
+void drwsurf_damage(struct drwsurf *ds, uint32_t x, uint32_t y, uint32_t w, uint32_t h)
+{
+    cairo_rectangle_int_t rect = { x, y, w, h };
+    cairo_region_union_rectangle(ds->damage, &rect);
+    cairo_region_union_rectangle(ds->backport_damage, &rect);
+    drwsurf_register_frame_cb(ds);
+}
+
 void
 drwsurf_resize(struct drwsurf *ds, uint32_t w, uint32_t h, double s)
 {
-    if (ds->buf) {
-        munmap(ds->pool_data, ds->size);
-        wl_buffer_destroy(ds->buf);
-        ds->buf = NULL;
-    }
-
     ds->scale = s;
     ds->width = ceil(w * s);
     ds->height = ceil(h * s);
 
-    setup_buffer(ds);
+    if (ds->damage)
+        cairo_region_destroy(ds->damage);
+    ds->damage = cairo_region_create();
+    if (ds->backport_damage)
+        cairo_region_destroy(ds->backport_damage);
+    ds->backport_damage = cairo_region_create();
+
+    ds->released = true;
+
+    setup_buffer(ds, ds->back_buffer);
+    setup_buffer(ds, ds->display_buffer);
+}
+
+void
+drwsurf_backport(struct drwsurf *ds)
+{
+    cairo_save(ds->back_buffer->cairo);
+
+    cairo_scale(ds->back_buffer->cairo, 1/ds->scale, 1/ds->scale);
+    cairo_set_operator(ds->back_buffer->cairo, CAIRO_OPERATOR_SOURCE);
+
+    cairo_rectangle_int_t r = {0};
+    for (int i = 0; i < cairo_region_num_rectangles(ds->backport_damage); i++) {
+        cairo_region_get_rectangle(ds->backport_damage, i, &r);
+
+        cairo_set_source_surface(ds->back_buffer->cairo, ds->display_buffer->cairo_surf, 0, 0);
+        cairo_rectangle(
+            ds->back_buffer->cairo,
+            r.x * ds->scale,
+            r.y * ds->scale,
+            r.width * ds->scale,
+            r.height * ds->scale
+        );
+        cairo_fill(ds->back_buffer->cairo);
+    };
+
+    cairo_restore(ds->back_buffer->cairo);
+    cairo_region_subtract(ds->backport_damage, ds->backport_damage);
+}
+
+void
+drwsurf_attach(struct drwsurf *ds)
+{
+    wl_surface_attach(ds->surf, ds->back_buffer->buf, 0, 0);
+    wl_surface_commit(ds->surf);
+    ds->released = false;
+    ds->attached = true;
 }
 
 void
 drwsurf_flip(struct drwsurf *ds)
 {
-    wl_surface_attach(ds->surf, ds->buf, 0, 0);
-    wl_surface_commit(ds->surf);
+    if (ds->released)
+        return;
+    ds->released = true;
+    struct drwbuf *tmp = ds->back_buffer;
+    ds->back_buffer = ds->display_buffer;
+    ds->display_buffer = tmp;
+
+    drwsurf_backport(ds);
 }
 
 void
-drw_draw_text(struct drwsurf *d, Color color, uint32_t x, uint32_t y,
+drw_draw_text(struct drwsurf *ds, Color color, uint32_t x, uint32_t y,
               uint32_t w, uint32_t h, uint32_t b, const char *label,
               PangoFontDescription *font_description)
 {
+    drwsurf_flip(ds);
+    struct drwbuf *d = ds->back_buffer;
+    drwsurf_damage(ds, x, y, w, h);
 
     cairo_save(d->cairo);
 
@@ -58,8 +156,12 @@ drw_draw_text(struct drwsurf *d, Color color, uint32_t x, uint32_t y,
 }
 
 void
-drw_do_clear(struct drwsurf *d, uint32_t x, uint32_t y, uint32_t w, uint32_t h)
+drw_do_clear(struct drwsurf *ds, uint32_t x, uint32_t y, uint32_t w, uint32_t h)
 {
+    drwsurf_flip(ds);
+    struct drwbuf *d = ds->back_buffer;
+    drwsurf_damage(ds, x, y, w, h);
+
     cairo_save(d->cairo);
 
     cairo_set_operator(d->cairo, CAIRO_OPERATOR_CLEAR);
@@ -70,9 +172,13 @@ drw_do_clear(struct drwsurf *d, uint32_t x, uint32_t y, uint32_t w, uint32_t h)
 }
 
 void
-drw_do_rectangle(struct drwsurf *d, Color color, uint32_t x, uint32_t y,
+drw_do_rectangle(struct drwsurf *ds, Color color, uint32_t x, uint32_t y,
                  uint32_t w, uint32_t h, bool over, int rounding)
 {
+    drwsurf_flip(ds);
+    struct drwbuf *d = ds->back_buffer;
+    drwsurf_damage(ds, x, y, w, h);
+
     cairo_save(d->cairo);
 
     if (over) {
@@ -128,41 +234,52 @@ drw_over_rectangle(struct drwsurf *d, Color color, uint32_t x, uint32_t y,
 }
 
 uint32_t
-setup_buffer(struct drwsurf *drwsurf)
+setup_buffer(struct drwsurf *drwsurf, struct drwbuf *drwbuf)
 {
+    int prev_size = drwbuf->size;
     int stride = drwsurf->width * 4;
-    drwsurf->size = stride * drwsurf->height;
+    drwbuf->size = stride * drwsurf->height;
 
-    int fd = allocate_shm_file(drwsurf->size);
+    int fd = allocate_shm_file(drwbuf->size);
     if (fd == -1) {
         return 1;
     }
 
-    drwsurf->pool_data =
-        mmap(NULL, drwsurf->size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
-    if (drwsurf->pool_data == MAP_FAILED) {
+    if (drwbuf->pool_data)
+        munmap(drwbuf->pool_data, prev_size);
+    drwbuf->pool_data =
+        mmap(NULL, drwbuf->size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+    if (drwbuf->pool_data == MAP_FAILED) {
         close(fd);
         return 1;
     }
 
+    if (drwbuf->buf)
+        wl_buffer_destroy(drwbuf->buf);
     struct wl_shm_pool *pool =
-        wl_shm_create_pool(drwsurf->ctx->shm, fd, drwsurf->size);
-    drwsurf->buf =
+        wl_shm_create_pool(drwsurf->ctx->shm, fd, drwbuf->size);
+    drwbuf->buf =
         wl_shm_pool_create_buffer(pool, 0, drwsurf->width, drwsurf->height,
                                   stride, WL_SHM_FORMAT_ARGB8888);
     wl_shm_pool_destroy(pool);
     close(fd);
+    wl_buffer_add_listener(drwbuf->buf, &buffer_listener, drwsurf);
 
-    cairo_surface_t *s = cairo_image_surface_create_for_data(
-        drwsurf->pool_data, CAIRO_FORMAT_ARGB32, drwsurf->width,
+
+    if (drwbuf->cairo_surf)
+        cairo_surface_destroy(drwbuf->cairo_surf);
+    drwbuf->cairo_surf = cairo_image_surface_create_for_data(
+        drwbuf->pool_data, CAIRO_FORMAT_ARGB32, drwsurf->width,
         drwsurf->height, stride);
 
-    drwsurf->cairo = cairo_create(s);
-    cairo_scale(drwsurf->cairo, drwsurf->scale, drwsurf->scale);
-    cairo_set_antialias(drwsurf->cairo, CAIRO_ANTIALIAS_NONE);
-    drwsurf->layout = pango_cairo_create_layout(drwsurf->cairo);
-    pango_layout_set_auto_dir(drwsurf->layout, false);
-    cairo_save(drwsurf->cairo);
+    if (drwbuf->cairo)
+        cairo_destroy(drwbuf->cairo);
+    drwbuf->cairo = cairo_create(drwbuf->cairo_surf);
+    cairo_scale(drwbuf->cairo, drwsurf->scale, drwsurf->scale);
+    cairo_set_antialias(drwbuf->cairo, CAIRO_ANTIALIAS_NONE);
+    drwbuf->layout = pango_cairo_create_layout(drwbuf->cairo);
+    pango_layout_set_auto_dir(drwbuf->layout, false);
+    cairo_save(drwbuf->cairo);
 
     return 0;
 }

@@ -62,6 +62,7 @@ static int wl_outputs_size;
 
 /* drawing */
 static struct drw draw_ctx;
+static struct drwbuf draw_surf_back_buffer, draw_surf_display_buffer, popup_draw_surf_back_buffer, popup_draw_surf_display_buffer;
 static struct drwsurf draw_surf, popup_draw_surf;
 
 /* layer surface parameters */
@@ -332,7 +333,6 @@ wl_pointer_axis(void *data, struct wl_pointer *wl_pointer, uint32_t time,
     }
 
     kbd_next_layer(&keyboard, NULL, (value >= 0));
-    drwsurf_flip(keyboard.surf);
 }
 
 void
@@ -517,7 +517,7 @@ xdg_popup_surface_configure(void *data, struct xdg_surface *xdg_surface,
 {
     xdg_surface_ack_configure(xdg_surface, serial);
     popup_xdg_surface_configured = true;
-    drwsurf_flip(&popup_draw_surf);
+    drwsurf_attach(&popup_draw_surf);
 }
 
 static const struct xdg_surface_listener xdg_popup_surface_listener = {
@@ -664,7 +664,7 @@ layer_surface_configure(void *data, struct zwlr_layer_surface_v1 *surface,
 
         zwlr_layer_surface_v1_ack_configure(surface, serial);
         kbd_resize(&keyboard, layouts, NumLayouts);
-        drwsurf_flip(&draw_surf);
+        drwsurf_attach(&draw_surf);
     } else {
         zwlr_layer_surface_v1_ack_configure(surface, serial);
     }
@@ -1018,7 +1018,11 @@ main(int argc, char **argv)
     }
 
     draw_surf.ctx = &draw_ctx;
+    draw_surf.back_buffer = &draw_surf_back_buffer;
+    draw_surf.display_buffer = &draw_surf_display_buffer;
     popup_draw_surf.ctx = &draw_ctx;
+    popup_draw_surf.back_buffer = &popup_draw_surf_back_buffer;
+    popup_draw_surf.display_buffer = &popup_draw_surf_display_buffer;
     keyboard.surf = &draw_surf;
     keyboard.popup_surf = &popup_draw_surf;
 
