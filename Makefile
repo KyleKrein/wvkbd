@@ -40,7 +40,7 @@ proto/%-client-protocol.h: proto/%.xml
 $(OBJECTS): $(HDRS) $(WVKBD_HEADERS)
 
 wvkbd-${LAYOUT}: config.h $(OBJECTS) layout.${LAYOUT}.h
-	$(CC) -o wvkbd-${LAYOUT} $(OBJECTS) $(LDFLAGS)
+	$(CC) -o wvkbd $(OBJECTS) $(LDFLAGS)
 
 clean:
 	rm -f $(OBJECTS) $(HDRS) $(WAYLAND_SRC) ${BIN} ${DOCS}
@@ -53,8 +53,8 @@ format:
 
 install: all
 	mkdir -p ${DESTDIR}${PREFIX}/bin
-	cp -f ${NAME}-${LAYOUT} ${DESTDIR}${PREFIX}/bin
-	chmod 755 ${DESTDIR}${PREFIX}/bin/${NAME}-${LAYOUT}
+	cp -f ${NAME} ${DESTDIR}${PREFIX}/bin
+	chmod 755 ${DESTDIR}${PREFIX}/bin/${NAME}
 	mkdir -p "${DESTDIR}${MANPREFIX}/man1"
 	sed "s/VERSION/${VERSION}/g" < ${MAN1} > ${DESTDIR}${MANPREFIX}/man1/${MAN1}
 	chmod 644 ${DESTDIR}${MANPREFIX}/man1/${MAN1}
