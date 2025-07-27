@@ -1,7 +1,7 @@
 #ifndef config_def_h_INCLUDED
 #define config_def_h_INCLUDED
 
-#define DEFAULT_FONT "Jost* 18"
+#define DEFAULT_FONT "Jost* 12"
 #define DEFAULT_ROUNDING 5
 static const int transparency = 255;
 
@@ -29,15 +29,15 @@ struct clr_scheme schemes[] = {
 
 /* layers is an ordered list of layouts, used to cycle through */
 static enum layout_id layers[] = {
-    Simple,
-    Full,      // First layout is the default layout on startup
+    Full,
+    Simple,      // First layout is the default layout on startup
     NumLayouts // signals the last item, may not be omitted
 };
 
 /* layers is an ordered list of layouts, used to cycle through */
 static enum layout_id landscape_layers[] = {
+    Full, // First layout is the default layout on startup
     Simple,
-    Landscape, // First layout is the default layout on startup
     NumLayouts // signals the last item, may not be omitted
 };
 
