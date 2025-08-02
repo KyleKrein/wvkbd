@@ -29,17 +29,17 @@ struct clr_scheme schemes[] = {
 
 /* layers is an ordered list of layouts, used to cycle through */
 static enum layout_id layers[] = {
-    Full,
-    Emoji,
-    Simple,      // First layout is the default layout on startup
+    Simple,
+    Full ,
+    Emoji,      // First layout is the default layout on startup
     NumLayouts // signals the last item, may not be omitted
 };
 
 /* layers is an ordered list of layouts, used to cycle through */
 static enum layout_id landscape_layers[] = {
-    Full, // First layout is the default layout on startup
+    Simple, // First layout is the default layout on startup
+    Full,    
     Emoji,
-    Simple,
     NumLayouts // signals the last item, may not be omitted
 };
 
