@@ -6,7 +6,7 @@
 #define KBD_PIXEL_LANDSCAPE_HEIGHT 375
 
 /* spacing around each key */
-#define KBD_KEY_BORDER 2
+#define KBD_KEY_BORDER 5
 
 /* layout declarations */
 enum layout_id {
@@ -207,7 +207,7 @@ static struct key keys_full[] = {
     {"0", ")", 1.0, Code, KEY_0, &layouts[ComposeBracket]},
     {"-", "_", 1.0, Code, KEY_MINUS},
     {"=", "+", 1.0, Code, KEY_EQUAL},
-    {"Backspace", "Backspace", 1.5, Code, KEY_BACKSPACE},
+    {"⌫", "⌫", 1.5, Code, KEY_BACKSPACE},
     {"", "", 0.0, EndRow},
 
     {"Tab", "Tab", 1.5, Code, KEY_TAB, .scheme = 1},
@@ -377,7 +377,7 @@ static struct key keys_landscape[] = {
     {"0", ")", 1.0, Code, KEY_0, &layouts[ComposeBracket]},
     {"-", "_", 1.0, Code, KEY_MINUS},
     {"=", "+", 1.0, Code, KEY_EQUAL},
-    {"Backspace", "Backspace", 1.5, Code, KEY_BACKSPACE},
+    {"⌫", "⌫", 1.5, Code, KEY_BACKSPACE},
     {"", "", 0.0, EndRow},
 
     {"Tab", "Tab", 1.5, Code, KEY_TAB, .scheme = 1},
@@ -625,7 +625,7 @@ static struct key keys_simple[] = {
     {"0", ")", 1.0, Code, KEY_0, &layouts[ComposeBracket]},
     {"-", "_", 1.0, Code, KEY_MINUS},
     {"=", "+", 1.0, Code, KEY_EQUAL},
-    {"Backspace", "Backspace", 1.0, Code, KEY_BACKSPACE, .scheme = 1},
+    {"⌫", "⌫", 1.0, Code, KEY_BACKSPACE, .scheme = 1},
     {"", "", 0.0, EndRow},
 
     {"q", "Q", 1.0, Code, KEY_Q, &layouts[Emoji]},
