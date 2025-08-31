@@ -673,6 +673,7 @@ static struct key keys_simple[] = {
 
     {"Ctrl", "Ctrl", 1.0, Mod, Ctrl, .scheme = 1},
     {"Alt", "Alt", 1.0, Mod, Alt, .scheme = 1},
+    {"Cmp", "Cmp", 1.0, Compose, .scheme = 1},
     {"", "", 5.0, Code, KEY_SPACE},
     {"⌨͕", "⌨͔", 1.0, NextLayer, .scheme = 1},
 
